@@ -131,6 +131,10 @@ public class AWSIotMqttClient extends AbstractAwsIotClient {
         super(clientEndpoint, clientId, keyStore, keyPassword);
     }
 
+    public AWSIotMqttClient(String clientEndpoint, String clientId) {
+        super(clientEndpoint, clientId);
+    }
+
     /**
      * Instantiates a new client using TLS 1.2 mutual authentication. Client
      * certificate and private key should be used to initialize the KeyManager
@@ -234,7 +238,7 @@ public class AWSIotMqttClient extends AbstractAwsIotClient {
      *            from services like STS server, AssumeRole, or Amazon Cognito.
      */
     public AWSIotMqttClient(String clientEndpoint, String clientId, String awsAccessKeyId, String awsSecretAccessKey,
-            String sessionToken) {
+                            String sessionToken) {
         super(clientEndpoint, clientId, awsAccessKeyId, awsSecretAccessKey, sessionToken);
     }
 

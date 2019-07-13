@@ -15,20 +15,11 @@
 
 package com.amazonaws.services.iot.client.sample.sampleUtil;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigInteger;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -114,10 +105,16 @@ public class SampleUtil {
     }
 
     private static List<Certificate> loadCertificatesFromFile(final String filename) {
-        File file = new File(filename);
-        if (!file.exists()) {
-            System.out.println("Certificate file: " + filename + " is not found.");
-            return null;
+        URL url = ClassLoader.getSystemResource(filename);
+        File file = null;
+        try {
+            file = new File(url.toURI());
+            if (!file.exists()) {
+                System.out.println("Certificate file: " + filename + " is not found.");
+                return null;
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
 
         try (BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file))) {
@@ -132,10 +129,16 @@ public class SampleUtil {
     private static PrivateKey loadPrivateKeyFromFile(final String filename, final String algorithm) {
         PrivateKey privateKey = null;
 
-        File file = new File(filename);
-        if (!file.exists()) {
-            System.out.println("Private key file not found: " + filename);
-            return null;
+        URL url = ClassLoader.getSystemResource(filename);
+        File file = null;
+        try {
+            file = new File(url.toURI());
+            if (!file.exists()) {
+                System.out.println("Private key file not found: " + filename);
+                return null;
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
         try (DataInputStream stream = new DataInputStream(new FileInputStream(file))) {
             privateKey = PrivateKeyReader.getPrivateKey(stream, algorithm);

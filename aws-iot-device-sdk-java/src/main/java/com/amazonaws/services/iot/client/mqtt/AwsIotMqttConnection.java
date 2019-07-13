@@ -15,26 +15,23 @@
 
 package com.amazonaws.services.iot.client.mqtt;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.net.SocketFactory;
-
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-
 import com.amazonaws.services.iot.client.AWSIotException;
 import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.core.AbstractAwsIotClient;
 import com.amazonaws.services.iot.client.core.AwsIotConnection;
 import com.amazonaws.services.iot.client.core.AwsIotMessageCallback;
 import com.amazonaws.services.iot.client.core.AwsIotRetryableException;
-
 import lombok.Getter;
 import lombok.Setter;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+
+import javax.net.SocketFactory;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class extends {@link AwsIotConnection} to provide the basic MQTT pub/sub
@@ -56,6 +53,23 @@ public class AwsIotMqttConnection extends AwsIotConnection {
         super(client);
 
         this.socketFactory = socketFactory;
+
+        messageListener = new AwsIotMqttMessageListener(client);
+        clientListener = new AwsIotMqttClientListener(client);
+
+        try {
+            mqttClient = new MqttAsyncClient(serverUri, client.getClientId(), new MemoryPersistence());
+            mqttClient.setCallback(clientListener);
+        } catch (MqttException e) {
+            throw new AWSIotException(e);
+        }
+    }
+
+    public AwsIotMqttConnection(AbstractAwsIotClient client, String serverUri)
+            throws AWSIotException {
+        super(client);
+
+        this.socketFactory = null;
 
         messageListener = new AwsIotMqttMessageListener(client);
         clientListener = new AwsIotMqttClientListener(client);

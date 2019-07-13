@@ -15,28 +15,15 @@
 
 package com.amazonaws.services.iot.client.core;
 
-import java.security.KeyStore;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-import javax.net.ssl.SSLSocketFactory;
-
-import com.amazonaws.services.iot.client.AWSIotConfig;
-import com.amazonaws.services.iot.client.AWSIotConnectionStatus;
-import com.amazonaws.services.iot.client.AWSIotDevice;
-import com.amazonaws.services.iot.client.AWSIotException;
-import com.amazonaws.services.iot.client.AWSIotMessage;
-import com.amazonaws.services.iot.client.AWSIotQos;
-import com.amazonaws.services.iot.client.AWSIotTimeoutException;
-import com.amazonaws.services.iot.client.AWSIotTopic;
+import com.amazonaws.services.iot.client.*;
 import com.amazonaws.services.iot.client.shadow.AbstractAwsIotDevice;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.net.ssl.SSLSocketFactory;
+import java.security.KeyStore;
+import java.util.concurrent.*;
+import java.util.logging.Logger;
 
 /**
  * The actual implementation of {@code AWSIotMqttClient}.
@@ -81,6 +68,19 @@ public abstract class AbstractAwsIotClient implements AwsIotConnectionCallback {
 
         try {
             connection = new AwsIotTlsConnection(this, keyStore, keyPassword);
+        } catch (AWSIotException e) {
+            throw new AwsIotRuntimeException(e);
+        }
+    }
+
+    protected AbstractAwsIotClient(String clientEndpoint, String clientId) {
+        this.clientEndpoint = clientEndpoint;
+        this.clientId = clientId;
+        this.connectionType = AwsIotConnectionType.MQTT_OVER_TLS;
+        this.clientEnableMetrics = false;
+
+        try {
+            connection = new AwsIotTcpConnection(this);
         } catch (AWSIotException e) {
             throw new AwsIotRuntimeException(e);
         }

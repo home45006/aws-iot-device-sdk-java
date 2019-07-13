@@ -18,14 +18,13 @@ package com.amazonaws.services.iot.client.sample.pubSub;
 import com.amazonaws.services.iot.client.*;
 import com.amazonaws.services.iot.client.sample.sampleUtil.CommandArguments;
 import com.amazonaws.services.iot.client.sample.sampleUtil.SampleUtil;
-import com.amazonaws.services.iot.client.sample.sampleUtil.SampleUtil.KeyStorePasswordPair;
 
 /**
  * This is an example that uses {@link AWSIotMqttClient} to subscribe to a topic and
  * publish messages to it. Both blocking and non-blocking publishing are
  * demonstrated in this example.
  */
-public class PublishSubscribeSample {
+public class PublishSubscribeTCPSample {
 
     private static final String TestTopic = "sdk/test/java";
     private static final AWSIotQos TestTopicQos = AWSIotQos.QOS0;
@@ -79,7 +78,7 @@ public class PublishSubscribeSample {
             long counter = 1;
 
 //            while (true) {
-            for(int i = 0; i < 1; i++) {
+            for(int i = 0; i < 10; i++) {
                 String payload = "hello from non-blocking publisher - " + (counter++);
                 AWSIotMessage message = new NonBlockingPublishListener(TestTopic, TestTopicQos, payload);
                 try {
@@ -102,25 +101,8 @@ public class PublishSubscribeSample {
         String clientEndpoint = arguments.getNotNull("clientEndpoint", SampleUtil.getConfig("clientEndpoint"));
         String clientId = arguments.getNotNull("clientId", SampleUtil.getConfig("clientId"));
 
-        String certificateFile = arguments.get("certificateFile", SampleUtil.getConfig("certificateFile"));
-        String privateKeyFile = arguments.get("privateKeyFile", SampleUtil.getConfig("privateKeyFile"));
-        if (awsIotClient == null && certificateFile != null && privateKeyFile != null) {
-            String algorithm = arguments.get("keyAlgorithm", SampleUtil.getConfig("keyAlgorithm"));
-
-            KeyStorePasswordPair pair = SampleUtil.getKeyStorePasswordPair(certificateFile, privateKeyFile, algorithm);
-
-            awsIotClient = new AWSIotMqttClient(clientEndpoint, clientId, pair.keyStore, pair.keyPassword);
-        }
-
         if (awsIotClient == null) {
-            String awsAccessKeyId = arguments.get("awsAccessKeyId", SampleUtil.getConfig("awsAccessKeyId"));
-            String awsSecretAccessKey = arguments.get("awsSecretAccessKey", SampleUtil.getConfig("awsSecretAccessKey"));
-            String sessionToken = arguments.get("sessionToken", SampleUtil.getConfig("sessionToken"));
-
-            if (awsAccessKeyId != null && awsSecretAccessKey != null) {
-                awsIotClient = new AWSIotMqttClient(clientEndpoint, clientId, awsAccessKeyId, awsSecretAccessKey,
-                        sessionToken);
-            }
+            awsIotClient = new AWSIotMqttClient(clientEndpoint, clientId);
         }
 
         if (awsIotClient == null) {
